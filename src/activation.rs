@@ -109,5 +109,5 @@ use crate::Matrix;
 /// let output = apply_activation(&input, &relu);
 /// // Output akan menjadi [0.0, 0.0, 1.0, 2.0]
 pub fn apply_activation(matrix: &Matrix, activation: &dyn ActivationFunction) -> Matrix {
-    matrix.map(|x| activation.derivative(x))
+    matrix.map(|x| activation.activate(x))
 }
