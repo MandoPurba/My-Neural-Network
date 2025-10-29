@@ -1,273 +1,299 @@
-# 🧠 Mini Neural Network Framework
+# Mini-Burn Deep Learning Framework
 
-Sebuah implementasi Neural Network dari scratch menggunakan Rust untuk tujuan pembelajaran. Framework ini dibuat untuk memahami bagaimana Neural Network bekerja secara fundamental tanpa menggunakan library deep learning yang kompleks.
+[![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🎯 Tujuan Proyek
+Mini-Burn adalah implementasi minimal dari framework deep learning yang terinspirasi oleh [Burn](https://burn.dev), dibangun dengan Rust untuk tujuan pembelajaran. Framework ini mendemonstrasikan konsep-konsep kunci dalam membangun sistem tensor yang type-safe dan performant.
 
-- **Pembelajaran**: Memahami cara kerja Neural Network dari dasar
-- **Implementasi Manual**: Semua operasi matrix dan algoritma dibuat dari scratch
-- **Sederhana tapi Lengkap**: Code yang mudah dipahami namun tetap fungsional
-- **Bahasa Indonesia**: Komentar dan dokumentasi dalam bahasa Indonesia
+## 🚀 Fitur Utama
 
-## 🚀 Fitur
+- **Type-Safe Tensors**: System tensor dengan type safety yang kuat menggunakan generics
+- **Multi-Backend Support**: Abstraksi backend untuk berbagai hardware (saat ini mendukung CPU)
+- **Multi-Dimensional Support**: Tensor dengan dimensi yang di-track pada compile time
+- **Multiple Data Types**: Mendukung Float, Int, dan Bool tensor
+- **Zero Dependencies**: Dibangun dari scratch tanpa dependencies eksternal
+- **Comprehensive Operations**: Operasi aritmatika, matrix multiplication, fungsi matematika
 
-### ✅ Operasi Matrix
-- Matrix multiplication, addition, subtraction
-- Transpose, Hadamard product (element-wise multiplication)
-- Scalar operations dan mapping functions
-- Xavier weight initialization
+## 📖 Arsitektur
 
-### ✅ Activation Functions
-- **ReLU**: `f(x) = max(0, x)` - Paling populer untuk hidden layers
-- **Sigmoid**: `f(x) = 1/(1 + e^(-x))` - Bagus untuk binary classification
-- **Tanh**: `f(x) = tanh(x)` - Centered around zero
-- **Linear**: `f(x) = x` - Untuk regression output
-- **Softmax**: Untuk multi-class classification
+```
+Tensor<B, D, K>
+├── B: Backend (CpuBackend, GpuBackend, etc.)
+├── D: Dimensions (compile-time constant)
+└── K: Data Type (Float, Int, Bool)
+```
 
-### ✅ Loss Functions
-- **Mean Squared Error (MSE)**: Untuk regression problems
-- **Binary Cross Entropy**: Untuk binary classification
+### Contoh Penggunaan
 
-### ✅ Neural Network
-- Dense/Fully Connected Layers
-- Forward propagation
-- Backpropagation algorithm
-- Gradient descent optimization
-- Batch training support
-- Training statistics tracking
+```rust
+use mini_burn::{Tensor, CpuBackend, Shape, Float, Int, Bool};
+
+// Tensor default (Float)
+let tensor: Tensor<CpuBackend, 2> = 
+    Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([2, 2]));
+
+// Tensor dengan tipe eksplisit
+let float_tensor: Tensor<CpuBackend, 2, Float> = 
+    Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([2, 2]));
+
+let int_tensor: Tensor<CpuBackend, 2, Int> = 
+    Tensor::from_data(vec![1, 2, 3, 4], Shape::new([2, 2]));
+
+let bool_tensor: Tensor<CpuBackend, 2, Bool> = 
+    Tensor::from_data(vec![true, false, true, false], Shape::new([2, 2]));
+```
+
+## 🛠️ Instalasi
+
+Tambahkan ke `Cargo.toml`:
+
+```toml
+[dependencies]
+mini_burn = "0.1.0"
+```
+
+Atau clone repository ini:
+
+```bash
+git clone https://github.com/yourusername/mini_burn.git
+cd mini_burn
+cargo build --release
+```
+
+## 📚 Dokumentasi
+
+### Factory Methods
+
+```rust
+// Tensor nol
+let zeros = Tensor::<CpuBackend, 2>::zeros(Shape::new([3, 3]));
+
+// Tensor satu
+let ones = Tensor::<CpuBackend, 2>::ones(Shape::new([3, 3]));
+
+// Tensor dengan value tertentu
+let filled = Tensor::<CpuBackend, 2>::full(Shape::new([2, 2]), 42.0);
+
+// Range tensor
+let range = Tensor::<CpuBackend, 1>::range(0.0, 10.0, 2.0); // [0, 2, 4, 6, 8]
+```
+
+### Operasi Tensor
+
+```rust
+let a = Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([2, 2]));
+let b = Tensor::from_data(vec![5.0, 6.0, 7.0, 8.0], Shape::new([2, 2]));
+
+// Element-wise operations
+let sum = a.add(&b);        // [6, 8, 10, 12]
+let diff = a.sub(&b);       // [-4, -4, -4, -4]
+let prod = a.mul(&b);       // [5, 12, 21, 32]
+let div = a.div(&b);        // [0.2, 0.33, 0.43, 0.5]
+
+// Scalar operations
+let scalar_add = a.add_scalar(10.0); // [11, 12, 13, 14]
+
+// Matrix multiplication
+let matmul = a.matmul(&b);  // Matrix multiplication untuk 2D tensors
+
+// Mathematical functions
+let sin_result = a.sin();
+let cos_result = a.cos();
+let exp_result = a.exp();
+let sqrt_result = a.sqrt();
+
+// Reduction operations
+let sum_all = a.sum();      // Sum semua elemen
+let mean_val = a.mean();    // Rata-rata
+let max_val = a.max();      // Nilai maksimum
+let min_val = a.min();      // Nilai minimum
+```
+
+### Multi-Dimensional Tensors
+
+```rust
+// 1D vector
+let vector: Tensor<CpuBackend, 1> = 
+    Tensor::from_data(vec![1.0, 2.0, 3.0], Shape::new([3]));
+
+// 2D matrix
+let matrix: Tensor<CpuBackend, 2> = 
+    Tensor::from_data(vec![1.0; 6], Shape::new([2, 3]));
+
+// 3D tensor
+let tensor_3d: Tensor<CpuBackend, 3> = 
+    Tensor::from_data(vec![1.0; 24], Shape::new([2, 3, 4]));
+
+// 4D tensor (common in deep learning)
+let tensor_4d: Tensor<CpuBackend, 4> = 
+    Tensor::from_data(vec![1.0; 120], Shape::new([2, 3, 4, 5]));
+```
+
+## 🧪 Menjalankan Examples
+
+Framework dilengkapi dengan beberapa contoh penggunaan:
+
+```bash
+# Penggunaan dasar
+cargo run --example basic_usage
+
+# Operasi advanced
+cargo run --example advanced_operations
+
+# Neural network sederhana
+cargo run --example simple_neural_network
+
+# Performance testing
+cargo run --example performance_test
+```
+
+## 🧪 Testing
+
+Jalankan semua tests:
+
+```bash
+cargo test
+```
+
+Jalankan tests dengan output detail:
+
+```bash
+cargo test -- --nocapture
+```
 
 ## 📊 Struktur Proyek
 
 ```
-My-Neural-Network/
+mini_burn/
 ├── src/
-│   ├── lib.rs          # Module exports
-│   ├── matrix.rs       # Matrix operations
-│   ├── activation.rs   # Activation functions
-│   ├── loss.rs         # Loss functions
-│   ├── layer.rs        # Dense layer implementation
-│   ├── network.rs      # Neural network implementation
-│   └── main.rs         # Demo dan examples
-├── Cargo.toml
+│   ├── lib.rs              # Entry point dan re-exports
+│   ├── backend/mod.rs      # Backend abstraction (CPU)
+│   ├── tensor/mod.rs       # Core tensor implementation
+│   ├── data/mod.rs         # Data types (Float, Int, Bool)
+│   ├── shape/mod.rs        # Shape dan dimension tracking
+│   └── ops/mod.rs          # Tensor operations
+├── examples/
+│   ├── basic_usage.rs      # Contoh penggunaan dasar
+│   ├── advanced_operations.rs
+│   ├── simple_neural_network.rs
+│   └── performance_test.rs
+├── tests/
+│   └── integration_tests.rs
 └── README.md
 ```
 
-## 🔧 Instalasi dan Menjalankan
-
-```bash
-# Clone repository
-git clone <repository-url>
-cd My-Neural-Network
-
-# Compile dan run demo
-cargo run --bin demo
-
-# Atau build saja
-cargo build --release
-```
-
-## 📖 Cara Penggunaan
-
-### 1. Basic Matrix Operations
+## 🎯 Contoh Neural Network
 
 ```rust
-use mini_burn::*;
+use mini_burn::{Tensor, CpuBackend, Shape};
 
-// Buat matrix
-let a = Matrix::from_data(vec![1.0, 2.0, 3.0, 4.0], 2, 2);
-let b = Matrix::from_data(vec![5.0, 6.0, 7.0, 8.0], 2, 2);
+// Implementasi layer linear sederhana
+struct LinearLayer {
+    weights: Tensor<CpuBackend, 2>,
+    bias: Tensor<CpuBackend, 1>,
+}
 
-// Operasi matrix
-let c = a.multiply(&b);     // Matrix multiplication
-let d = a.add(&b);          // Element-wise addition
-let e = a.transpose();      // Transpose
-```
-
-### 2. Membuat Neural Network
-
-```rust
-// Cara 1: Manual layer by layer
-let mut network = NeuralNetwork::new();
-network.add_dense_layer(784, 128, "relu");    // Input layer
-network.add_dense_layer(128, 64, "relu");     // Hidden layer
-network.add_dense_layer(64, 10, "sigmoid");   // Output layer
-
-// Cara 2: Architecture builder (lebih mudah)
-let mut network = NeuralNetwork::from_architecture(
-    &[784, 128, 64, 10],  // Layer sizes
-    "relu",               // Hidden activation
-    "sigmoid"             // Output activation
-);
-```
-
-### 3. Training Network
-
-```rust
-// Siapkan data
-let train_inputs = Matrix::from_data(/* your input data */, rows, cols);
-let train_targets = Matrix::from_data(/* your target data */, rows, cols);
-
-// Pilih loss function
-let loss_fn = BinaryCrossEntropy;  // atau MeanSquaredError
-
-// Training
-network.train(
-    &train_inputs,    // Training data
-    &train_targets,   // Target labels
-    &loss_fn,        // Loss function
-    0.01,            // Learning rate
-    1000,            // Epochs
-    true             // Verbose output
-);
-```
-
-### 4. Prediksi
-
-```rust
-// Prediksi pada data baru
-let test_input = Matrix::from_data(vec![0.5, -0.3, 1.2], 1, 3);
-let prediction = network.predict(&test_input);
-
-// Evaluasi accuracy (untuk classification)
-let accuracy = network.calculate_accuracy(&test_inputs, &test_targets);
-println!("Accuracy: {:.2}%", accuracy * 100.0);
-```
-
-## 🎲 Contoh: XOR Problem
-
-XOR adalah problem klasik yang tidak bisa diselesaikan dengan linear classifier, sehingga butuh Neural Network:
-
-```rust
-fn demo_xor() {
-    // Data XOR: [x1, x2] -> [x1 XOR x2]
-    let inputs = Matrix::from_data(vec![
-        0.0, 0.0,  // 0 XOR 0 = 0
-        0.0, 1.0,  // 0 XOR 1 = 1
-        1.0, 0.0,  // 1 XOR 0 = 1
-        1.0, 1.0,  // 1 XOR 1 = 0
-    ], 4, 2);
+impl LinearLayer {
+    fn new(input_size: usize, output_size: usize) -> Self {
+        let weights = Tensor::zeros(Shape::new([input_size, output_size]));
+        let bias = Tensor::zeros(Shape::new([output_size]));
+        Self { weights, bias }
+    }
     
-    let targets = Matrix::from_data(vec![0.0, 1.0, 1.0, 0.0], 4, 1);
+    fn forward(&self, input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
+        // Simplified forward pass
+        // input @ weights + bias
+        // ... implementasi detail
+    }
+}
+
+// Fungsi aktivasi
+fn relu(input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
+    let data: Vec<f32> = input.to_data()
+        .iter()
+        .map(|&x| if x > 0.0 { x } else { 0.0 })
+        .collect();
     
-    // Network: 2 input -> 4 hidden -> 1 output
-    let mut network = NeuralNetwork::from_architecture(
-        &[2, 4, 1], "relu", "sigmoid"
-    );
-    
-    // Training
-    let loss_fn = BinaryCrossEntropy;
-    network.train(&inputs, &targets, &loss_fn, 0.1, 1000, true);
-    
-    // Test
-    let predictions = network.predict(&inputs);
-    // Network seharusnya bisa memprediksi XOR dengan benar!
+    Tensor::from_data(data, input.shape().clone())
 }
 ```
 
-## 📚 Konsep Neural Network yang Diimplementasi
+## 🔬 Pembelajaran
 
-### 1. **Forward Propagation**
-```
-Input -> Layer1 -> Activation -> Layer2 -> Activation -> ... -> Output
-```
+Framework ini dibuat untuk tujuan pembelajaran deep learning dan Rust. Beberapa konsep yang dipelajari:
 
-Setiap layer melakukan operasi: `output = activation(input × weights + bias)`
+1. **Type System**: Penggunaan generics dan trait bounds untuk type safety
+2. **Memory Management**: Rust ownership model untuk tensor data
+3. **Abstraction**: Backend abstraction untuk portability
+4. **Performance**: Zero-cost abstractions
+5. **Architecture Design**: Sistem modular dan extensible
 
-### 2. **Backpropagation**
-```
-Loss -> ∂Loss/∂Output -> ∂Loss/∂Weights -> Update Weights
-```
+## 🚧 Roadmap
 
-Algorithm untuk menghitung gradients dan update weights:
-- Hitung error di output layer
-- Propagate error mundur ke layer sebelumnya  
-- Update weights menggunakan gradient descent
+### Phase 1: Core Improvements
+- [ ] Broadcasting support
+- [ ] More tensor operations (sin, cos, exp, log, etc.) ✅
+- [ ] Better error handling dengan Result types
+- [ ] SIMD optimizations
 
-### 3. **Gradient Descent**
-```
-weights_new = weights_old - learning_rate × gradient
-```
+### Phase 2: Deep Learning Features
+- [ ] Automatic differentiation
+- [ ] Neural network layers
+- [ ] Optimizers (SGD, Adam)
+- [ ] Loss functions
 
-### 4. **Matrix Operations yang Penting**
-- **Forward**: `Y = X × W + B`
-- **Weight Gradient**: `∂W = X^T × ∂Y`
-- **Input Gradient**: `∂X = ∂Y × W^T`
+### Phase 3: Advanced Features
+- [ ] GPU backend
+- [ ] Model serialization
+- [ ] Graph optimization
+- [ ] JIT compilation
 
-## 🎯 Problem yang Bisa Diselesaikan
+### Phase 4: Production Features
+- [ ] Distributed training
+- [ ] Mixed precision
+- [ ] Dynamic shapes
+- [ ] Custom kernels
 
-### Classification Problems
-- Binary classification (sigmoid output + binary cross entropy)
-- Multi-class classification (softmax output + categorical cross entropy)
+## 📈 Performance
 
-### Regression Problems  
-- Function approximation (linear output + MSE loss)
-- Curve fitting
+Current implementation:
+- **Element-wise operations**: O(n) linear dengan jumlah elemen
+- **Matrix multiplication**: O(n³) algoritma naive
+- **Memory allocation**: Tensor baru dibuat untuk setiap operasi
+- **SIMD**: Belum diimplementasikan
 
-### Demo yang Tersedia
-- **XOR Problem**: Classic non-linear classification
-- **Simple Regression**: y = 2x + 1 function approximation
-
-## 🔍 Detail Implementasi
-
-### Matrix Operations (`matrix.rs`)
-- Storage: 1D vector untuk efisiensi memory
-- Row-major order untuk akses yang cepat
-- Bounds checking untuk safety
-
-### Dense Layer (`layer.rs`)
-- Weights: Xavier initialization untuk konvergensi yang baik
-- Bias: Initialized to zero
-- Forward: Linear transformation + activation
-- Backward: Gradient computation + weight updates
-
-### Activation Functions (`activation.rs`)
-- Trait-based design untuk extensibility
-- Forward pass: `activate(x)`
-- Backward pass: `derivative(x)`
-
-### Loss Functions (`loss.rs`)
-- Trait-based design
-- Forward: `calculate_loss(predictions, targets)`
-- Backward: `calculate_gradient(predictions, targets)`
-
-## 🚧 Limitasi Saat Ini
-
-- Hanya Dense/Fully Connected layers (belum ada CNN, RNN)
-- Optimizer hanya basic gradient descent (belum ada Adam, RMSprop)
-- Belum ada regularization (dropout, L1/L2)
-- Belum ada batch normalization
-- Single-threaded (belum ada parallelization)
-
-## 🎓 Tujuan Pembelajaran
-
-Framework ini dibuat untuk memahami:
-
-1. **Bagaimana matrix operations bekerja** dalam deep learning
-2. **Algoritma backpropagation** step by step
-3. **Gradient descent optimization** secara manual
-4. **Architecture design** untuk neural networks
-5. **Forward dan backward pass** dalam detail
+Optimization opportunities:
+- SIMD instructions untuk operasi vectorized
+- BLAS integration untuk linear algebra yang optimal
+- In-place operations untuk mengurangi alokasi memori
+- Parallel processing untuk tensor besar
+- GPU acceleration
 
 ## 🤝 Kontribusi
 
-Silakan berkontribusi untuk:
-- Menambah activation functions baru
-- Implementasi optimizer yang lebih advanced
-- Menambah layer types (Convolutional, LSTM, dll)
-- Optimisasi performance
-- Menambah examples dan tutorials
+Ini adalah proyek pembelajaran, silakan fork dan eksperimen sesuai kebutuhan Anda!
 
-## 📜 Lisensi
+### Guidelines
+1. Fork repository
+2. Buat feature branch
+3. Commit changes dengan descriptive messages
+4. Tambahkan tests untuk fitur baru
+5. Buat pull request
 
-MIT License - Bebas digunakan untuk pembelajaran dan development.
+## 📝 Lisensi
+
+Proyek ini dilisensikan under MIT License - lihat file [LICENSE](LICENSE) untuk detail.
 
 ## 🙏 Acknowledgments
 
-Inspired by:
-- Neural Networks and Deep Learning by Michael Nielsen
-- Deep Learning by Ian Goodfellow
-- Rust programming language community
+- Inspired by [Burn Framework](https://burn.dev)
+- Rust community untuk dokumentasi dan resources yang excellent
+- Deep learning community untuk knowledge sharing
+
+## 📧 Kontak
+
+Jika ada pertanyaan atau saran, silakan buat issue di repository ini.
 
 ---
 
-**Catatan**: Ini adalah implementasi untuk pembelajaran. Untuk production, gunakan framework seperti Candle, tch, atau PyTorch.
+**Note**: Ini adalah implementasi minimal untuk tujuan pembelajaran. Untuk production workloads, gunakan framework yang sudah matang seperti Burn, Candle, atau tch.

@@ -1,6 +1,42 @@
 [package]
 name = "mini_burn"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A minimal deep learning framework inspired by Burn, built from scratch in Rust"
+license = "MIT"
+repository = "https://github.com/yourusername/mini_burn"
+keywords = ["deep-learning", "machine-learning", "tensor", "neural-network", "rust"]
+categories = ["science", "mathematics"]
 
 [dependencies]
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "advanced_operations"
+path = "examples/advanced_operations.rs"
+
+[[example]]
+name = "simple_neural_network"
+path = "examples/simple_neural_network.rs"
+
+[[example]]
+name = "performance_test"
+path = "examples/performance_test.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[features]
+default = []

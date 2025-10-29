@@ -1,14 +1,65 @@
-// Neural Network Framework dari Scratch
-// Mari kita buat step by step untuk memahami bagaimana NN bekerja
+//! Mini-Burn: A minimal deep learning framework inspired by Burn
+//!
+//! This framework provides a tensor abstraction with support for multiple backends,
+//! data types, and multi-dimensional operations.
 
-pub mod activation;
-pub mod layer;
-pub mod loss;
-pub mod matrix;
-pub mod network;
+pub mod backend;
+pub mod data;
+pub mod ops;
+pub mod shape;
+pub mod tensor;
 
-pub use activation::*;
-pub use layer::*;
-pub use loss::*;
-pub use matrix::*;
-pub use network::*;
+// Re-export main types for convenience
+pub use backend::{Backend, CpuBackend};
+pub use data::{Bool, Float, Int};
+pub use shape::Shape;
+pub use tensor::Tensor;
+
+/// The default float type used throughout the framework
+pub type DefaultFloat = f32;
+
+/// The default int type used throughout the framework
+pub type DefaultInt = i32;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_tensor_creation() {
+        // Test basic tensor creation with CPU backend
+        let shape = Shape::new([2, 3]);
+
+        // Create a float tensor
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let tensor: Tensor<CpuBackend, 2> = Tensor::from_data(data, shape);
+
+        assert_eq!(tensor.shape().dims(), &[2, 3]);
+    }
+
+    #[test]
+    fn tensor_with_different_types() {
+        let shape = Shape::new([2, 2]);
+
+        // Float tensor (default)
+        let float_data = vec![1.0, 2.0, 3.0, 4.0];
+        let float_tensor: Tensor<CpuBackend, 2> = Tensor::from_data(float_data, shape.clone());
+
+        // Explicit float tensor
+        let explicit_float_tensor: Tensor<CpuBackend, 2, Float> =
+            Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], shape.clone());
+
+        // Int tensor
+        let int_data = vec![1, 2, 3, 4];
+        let int_tensor: Tensor<CpuBackend, 2, Int> = Tensor::from_data(int_data, shape.clone());
+
+        // Bool tensor
+        let bool_data = vec![true, false, true, false];
+        let bool_tensor: Tensor<CpuBackend, 2, Bool> = Tensor::from_data(bool_data, shape);
+
+        assert_eq!(float_tensor.shape().dims(), &[2, 2]);
+        assert_eq!(explicit_float_tensor.shape().dims(), &[2, 2]);
+        assert_eq!(int_tensor.shape().dims(), &[2, 2]);
+        assert_eq!(bool_tensor.shape().dims(), &[2, 2]);
+    }
+}
