@@ -11,6 +11,9 @@ pub trait Backend: Clone + Send + Sync + 'static {
     /// Storage type for tensors
     type Storage<T: DataType>: Clone + Send + Sync;
 
+    /// Get the name of this backend
+    fn name() -> String;
+
     /// Get the default device for this backend
     fn default_device() -> Self::Device;
 
@@ -54,6 +57,10 @@ impl Default for CpuBackend {
 impl Backend for CpuBackend {
     type Device = CpuDevice;
     type Storage<T: DataType> = CpuStorage<T>;
+
+    fn name() -> String {
+        "CpuBackend".to_string()
+    }
 
     fn default_device() -> Self::Device {
         CpuDevice

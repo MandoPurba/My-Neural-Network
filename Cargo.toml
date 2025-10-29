@@ -47,6 +47,22 @@ path = "examples/high_level_nn.rs"
 name = "mnist_with_nn_api"
 path = "examples/mnist_with_nn_api.rs"
 
+[[example]]
+name = "core_features_demo"
+path = "examples/core_features_demo.rs"
+
+[[example]]
+name = "minimal_core_demo"
+path = "examples/minimal_core_demo.rs"
+
+[[example]]
+name = "working_demo"
+path = "examples/working_demo.rs"
+
+[[example]]
+name = "simple_core_demo"
+path = "examples/simple_core_demo.rs"
+
 [profile.release]
 opt-level = 3
 lto = true

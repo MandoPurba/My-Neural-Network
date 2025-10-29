@@ -4,7 +4,7 @@
 //! It includes common layers, activation functions, loss functions, and model utilities.
 
 use crate::backend::Backend;
-use crate::data::{DataType, Element, Float};
+use crate::data::Float;
 use crate::shape::Shape;
 use crate::tensor::Tensor;
 

@@ -43,7 +43,7 @@ impl Initializer {
     ) -> Tensor<B, 2, Float> {
         let input_size = shape.dim(0);
         let output_size = shape.dim(1);
-        let total_size = input_size * output_size;
+        let _total_size = input_size * output_size;
 
         match strategy {
             InitStrategy::Zeros => Tensor::zeros(shape),

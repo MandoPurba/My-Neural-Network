@@ -45,6 +45,17 @@ impl<B: Backend + Default, const D: usize, K: DataType> Tensor<B, D, K> {
         &self.shape
     }
 
+    /// Create a tensor of zeros with the same shape as this tensor
+    pub fn zeros_like(&self) -> Self
+    where
+        K::Primitive: Clone + Default,
+    {
+        let zero_value = K::Primitive::default();
+        let size = self.shape.numel();
+        let data = vec![zero_value; size];
+        Tensor::from_data(data, self.shape.clone())
+    }
+
     /// Get the total number of elements
     pub fn numel(&self) -> usize {
         self.shape.numel()

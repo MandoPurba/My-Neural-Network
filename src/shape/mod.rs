@@ -24,6 +24,11 @@ impl<const D: usize> Shape<D> {
         self.dims.iter().product()
     }
 
+    /// Get the total number of elements (alias for numel)
+    pub fn num_elements(&self) -> usize {
+        self.numel()
+    }
+
     /// Get the number of dimensions
     pub fn ndim(&self) -> usize {
         D

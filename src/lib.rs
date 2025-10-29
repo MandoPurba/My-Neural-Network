@@ -3,18 +3,28 @@
 //! This framework provides a tensor abstraction with support for multiple backends,
 //! data types, and multi-dimensional operations.
 
+pub mod autodiff;
 pub mod backend;
+pub mod broadcast;
 pub mod data;
+pub mod error;
 pub mod nn;
 pub mod ops;
+pub mod optim;
 pub mod shape;
 pub mod tensor;
+// pub mod train;  // Temporarily commented out due to compilation errors
 
 // Re-export main types for convenience
+pub use autodiff::{AutodiffTensor, GradTensor, RequiresGrad};
 pub use backend::{Backend, CpuBackend};
+pub use broadcast::{BroadcastError, Broadcastable, Broadcasting};
 pub use data::{Bool, Float, Int};
+pub use error::{MiniBurnError, Result};
+pub use optim::{Adam, Optimizer, Parameter, Sgd, TensorParameter};
 pub use shape::Shape;
 pub use tensor::Tensor;
+// pub use train::{TrainingConfig, TrainingLoop, TrainingMetrics}; // Temporarily commented out
 
 /// The default float type used throughout the framework
 pub type DefaultFloat = f32;
