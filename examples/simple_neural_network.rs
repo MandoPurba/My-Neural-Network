@@ -51,32 +51,7 @@ impl LinearLayer {
     }
 }
 
-/// Simple activation functions
-fn relu(input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
-    let data: Vec<f32> = input
-        .to_data()
-        .iter()
-        .map(|&x| if x > 0.0 { x } else { 0.0 })
-        .collect();
-
-    Tensor::from_data(data, input.shape().clone())
-}
-
-fn sigmoid(input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
-    let data: Vec<f32> = input
-        .to_data()
-        .iter()
-        .map(|&x| 1.0 / (1.0 + (-x).exp()))
-        .collect();
-
-    Tensor::from_data(data, input.shape().clone())
-}
-
-fn tanh_activation(input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
-    let data: Vec<f32> = input.to_data().iter().map(|&x| x.tanh()).collect();
-
-    Tensor::from_data(data, input.shape().clone())
-}
+// Note: We now use the built-in activation functions from the tensor operations
 
 /// Simple 2-layer neural network
 struct SimpleNetwork {
@@ -95,11 +70,11 @@ impl SimpleNetwork {
     fn forward(&self, input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
         // Layer 1 + ReLU activation
         let hidden = self.layer1.forward(input);
-        let hidden_activated = relu(&hidden);
+        let hidden_activated = hidden.relu();
 
         // Layer 2 + Sigmoid activation
         let output = self.layer2.forward(&hidden_activated);
-        sigmoid(&output)
+        output.sigmoid()
     }
 }
 
@@ -127,10 +102,10 @@ impl MultiLayerNetwork {
 
             // Apply activation function (except for the last layer)
             if i < self.layers.len() - 1 {
-                current = tanh_activation(&current);
+                current = current.tanh();
             } else {
                 // Apply sigmoid to output layer
-                current = sigmoid(&current);
+                current = current.sigmoid();
             }
         }
 
@@ -197,19 +172,29 @@ fn main() {
         network.layer2.bias.shape().dims()
     );
 
-    // 6. Manual activation function testing
-    println!("\n6. Activation Functions:");
-    let test_values = Tensor::from_data(vec![-2.0, -1.0, 0.0, 1.0, 2.0], Shape::new([5]));
+    // 6. Built-in activation function testing
+    println!("\n6. Built-in Activation Functions:");
+    let test_values: Tensor<CpuBackend, 1> =
+        Tensor::from_data(vec![-2.0, -1.0, 0.0, 1.0, 2.0], Shape::new([5]));
     println!("Test values: {:?}", test_values.to_data());
 
-    let relu_result = relu(&test_values);
+    let relu_result = test_values.relu();
     println!("ReLU result: {:?}", relu_result.to_data());
 
-    let sigmoid_result = sigmoid(&test_values);
+    let sigmoid_result = test_values.sigmoid();
     println!("Sigmoid result: {:?}", sigmoid_result.to_data());
 
-    let tanh_result = tanh_activation(&test_values);
+    let tanh_result = test_values.tanh();
     println!("Tanh result: {:?}", tanh_result.to_data());
+
+    let leaky_relu_result = test_values.leaky_relu(0.1);
+    println!("Leaky ReLU result: {:?}", leaky_relu_result.to_data());
+
+    let gelu_result = test_values.gelu();
+    println!("GELU result: {:?}", gelu_result.to_data());
+
+    let swish_result = test_values.swish();
+    println!("Swish result: {:?}", swish_result.to_data());
 
     // 7. Multi-layer network demonstration
     println!("\n7. Multi-Layer Network:");
@@ -289,7 +274,7 @@ fn main() {
     println!("\n=== Neural Network Demo Complete ===");
     println!("This demonstrates basic building blocks for deep learning:");
     println!("- Linear layers with matrix multiplication");
-    println!("- Activation functions (ReLU, Sigmoid, Tanh)");
+    println!("- Built-in activation functions (ReLU, Sigmoid, Tanh, Leaky ReLU, GELU, Swish)");
     println!("- Forward pass through multiple layers");
     println!("- Multi-layer architectures");
     println!("- Classification simulation");

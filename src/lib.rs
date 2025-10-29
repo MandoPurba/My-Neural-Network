@@ -5,6 +5,7 @@
 
 pub mod backend;
 pub mod data;
+pub mod nn;
 pub mod ops;
 pub mod shape;
 pub mod tensor;

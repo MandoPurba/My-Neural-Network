@@ -13,6 +13,9 @@ Mini-Burn adalah implementasi minimal dari framework deep learning yang terinspi
 - **Multiple Data Types**: Mendukung Float, Int, dan Bool tensor
 - **Zero Dependencies**: Dibangun dari scratch tanpa dependencies eksternal
 - **Comprehensive Operations**: Operasi aritmatika, matrix multiplication, fungsi matematika
+- **Activation Functions**: ReLU, Sigmoid, Tanh, Softmax, GELU, Swish, ELU, Leaky ReLU
+- **Computer Vision**: Neural network untuk image classification (MNIST-like examples)
+- **Deep Learning**: Multi-layer networks dengan forward pass computation
 
 ## 📖 Arsitektur
 
@@ -23,7 +26,7 @@ Tensor<B, D, K>
 └── K: Data Type (Float, Int, Bool)
 ```
 
-### Contoh Penggunaan
+### Contoh Penggunaan Dasar
 
 ```rust
 use mini_burn::{Tensor, CpuBackend, Shape, Float, Int, Bool};
@@ -43,6 +46,70 @@ let bool_tensor: Tensor<CpuBackend, 2, Bool> =
     Tensor::from_data(vec![true, false, true, false], Shape::new([2, 2]));
 ```
 
+## 🔥 Operasi Aktivasi
+
+Framework ini mendukung berbagai fungsi aktivasi yang umum digunakan dalam deep learning:
+
+```rust
+let x: Tensor<CpuBackend, 1> = 
+    Tensor::from_data(vec![-2.0, -1.0, 0.0, 1.0, 2.0], Shape::new([5]));
+
+// Fungsi aktivasi dasar
+let relu_output = x.relu();               // ReLU: max(0, x)
+let sigmoid_output = x.sigmoid();         // Sigmoid: 1/(1 + exp(-x))
+let tanh_output = x.tanh();              // Tanh: tanh(x)
+
+// Fungsi aktivasi lanjutan
+let leaky_relu_output = x.leaky_relu(0.1); // Leaky ReLU dengan alpha=0.1
+let gelu_output = x.gelu();              // GELU (Gaussian Error Linear Unit)
+let swish_output = x.swish();            // Swish/SiLU: x * sigmoid(x)
+let elu_output = x.elu(1.0);             // ELU dengan alpha=1.0
+
+// Softmax untuk probabilitas
+let logits: Tensor<CpuBackend, 1> = 
+    Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([4]));
+let probabilities = logits.softmax();    // Output: distribusi probabilitas
+
+// Softmax 2D (batch processing)
+let batch_logits: Tensor<CpuBackend, 2> = 
+    Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], Shape::new([2, 3]));
+let batch_probs = batch_logits.softmax(); // Softmax per baris
+```
+
+### Karakteristik Fungsi Aktivasi
+
+| Fungsi | Range Output | Kegunaan Utama |
+|--------|-------------|----------------|
+| ReLU | [0, ∞) | Hidden layers, cepat dan sederhana |
+| Leaky ReLU | (-∞, ∞) | Mengatasi dying ReLU problem |
+| Sigmoid | (0, 1) | Binary classification, output layer |
+| Tanh | (-1, 1) | Hidden layers, zero-centered |
+| Softmax | (0, 1), sum=1 | Multi-class classification |
+| GELU | (-∞, ∞) | Modern transformer models |
+| Swish/SiLU | (-∞, ∞) | Smooth, self-gated activation |
+| ELU | (-α, ∞) | Smooth negative part |
+
+## 🧠 Neural Network Example
+
+```rust
+use mini_burn::{Tensor, CpuBackend, Shape};
+
+// Simulasi forward pass pada dense layer
+let input: Tensor<CpuBackend, 2> = 
+    Tensor::from_data(vec![0.5, -0.2, 1.0, -0.1, 0.8, -0.5], Shape::new([2, 3]));
+
+let weights: Tensor<CpuBackend, 2> = 
+    Tensor::from_data(vec![0.2, -0.1, 0.3, 0.4, 0.1, 0.5, -0.2, 0.0, -0.3, 0.2, 0.1, 0.6], 
+                     Shape::new([3, 4]));
+
+// Forward pass: output = input @ weights
+let linear_output = input.matmul(&weights);
+
+// Aplikasi aktivasi yang berbeda
+let relu_output = linear_output.relu();
+let softmax_output = linear_output.softmax(); // Probabilitas per sample
+```
+
 ## 🛠️ Instalasi
 
 Tambahkan ke `Cargo.toml`:
@@ -60,240 +127,254 @@ cd mini_burn
 cargo build --release
 ```
 
-## 📚 Dokumentasi
-
-### Factory Methods
+## 🚀 Quick Start
 
 ```rust
-// Tensor nol
-let zeros = Tensor::<CpuBackend, 2>::zeros(Shape::new([3, 3]));
+use mini_burn::{Tensor, CpuBackend, Shape};
 
-// Tensor satu
-let ones = Tensor::<CpuBackend, 2>::ones(Shape::new([3, 3]));
-
-// Tensor dengan value tertentu
-let filled = Tensor::<CpuBackend, 2>::full(Shape::new([2, 2]), 42.0);
-
-// Range tensor
-let range = Tensor::<CpuBackend, 1>::range(0.0, 10.0, 2.0); // [0, 2, 4, 6, 8]
+fn main() {
+    // Buat tensor 2D
+    let a: Tensor<CpuBackend, 2> = 
+        Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([2, 2]));
+    
+    let b: Tensor<CpuBackend, 2> = 
+        Tensor::from_data(vec![5.0, 6.0, 7.0, 8.0], Shape::new([2, 2]));
+    
+    // Operasi dasar
+    let sum = a.add(&b);
+    let product = a.mul(&b);
+    let matrix_mult = a.matmul(&b);
+    
+    // Fungsi matematika
+    let exp_a = a.exp();
+    let sqrt_a = a.sqrt();
+    
+    // Fungsi aktivasi
+    let relu_a = a.relu();
+    let sigmoid_a = a.sigmoid();
+    let softmax_a = a.softmax();
+    
+    println!("Sum: {:?}", sum.to_data());
+    println!("ReLU: {:?}", relu_a.to_data());
+    println!("Softmax: {:?}", softmax_a.to_data());
+}
 ```
 
-### Operasi Tensor
+## 📊 Examples
 
-```rust
-let a = Tensor::from_data(vec![1.0, 2.0, 3.0, 4.0], Shape::new([2, 2]));
-let b = Tensor::from_data(vec![5.0, 6.0, 7.0, 8.0], Shape::new([2, 2]));
-
-// Element-wise operations
-let sum = a.add(&b);        // [6, 8, 10, 12]
-let diff = a.sub(&b);       // [-4, -4, -4, -4]
-let prod = a.mul(&b);       // [5, 12, 21, 32]
-let div = a.div(&b);        // [0.2, 0.33, 0.43, 0.5]
-
-// Scalar operations
-let scalar_add = a.add_scalar(10.0); // [11, 12, 13, 14]
-
-// Matrix multiplication
-let matmul = a.matmul(&b);  // Matrix multiplication untuk 2D tensors
-
-// Mathematical functions
-let sin_result = a.sin();
-let cos_result = a.cos();
-let exp_result = a.exp();
-let sqrt_result = a.sqrt();
-
-// Reduction operations
-let sum_all = a.sum();      // Sum semua elemen
-let mean_val = a.mean();    // Rata-rata
-let max_val = a.max();      // Nilai maksimum
-let min_val = a.min();      // Nilai minimum
-```
-
-### Multi-Dimensional Tensors
-
-```rust
-// 1D vector
-let vector: Tensor<CpuBackend, 1> = 
-    Tensor::from_data(vec![1.0, 2.0, 3.0], Shape::new([3]));
-
-// 2D matrix
-let matrix: Tensor<CpuBackend, 2> = 
-    Tensor::from_data(vec![1.0; 6], Shape::new([2, 3]));
-
-// 3D tensor
-let tensor_3d: Tensor<CpuBackend, 3> = 
-    Tensor::from_data(vec![1.0; 24], Shape::new([2, 3, 4]));
-
-// 4D tensor (common in deep learning)
-let tensor_4d: Tensor<CpuBackend, 4> = 
-    Tensor::from_data(vec![1.0; 120], Shape::new([2, 3, 4, 5]));
-```
-
-## 🧪 Menjalankan Examples
-
-Framework dilengkapi dengan beberapa contoh penggunaan:
+Jalankan contoh-contoh yang tersedia:
 
 ```bash
-# Penggunaan dasar
+# Penggunaan dasar tensor dan operasi
 cargo run --example basic_usage
 
-# Operasi advanced
+# Operasi matematika lanjutan
 cargo run --example advanced_operations
 
-# Neural network sederhana
+# Demonstrasi fungsi aktivasi
+cargo run --example activation_functions
+
+# Simulasi neural network sederhana
 cargo run --example simple_neural_network
 
-# Performance testing
-cargo run --example performance_test
+# Computer vision - MNIST classification demo
+cargo run --example mnist_demo
+
+# Simple MNIST - pattern recognition
+cargo run --example simple_mnist
+
+# Test performa
+cargo run --example performance_test --release
 ```
 
 ## 🧪 Testing
 
-Jalankan semua tests:
-
 ```bash
+# Jalankan semua test
 cargo test
-```
 
-Jalankan tests dengan output detail:
+# Test spesifik aktivasi function
+cargo test activation
 
-```bash
+# Test dengan output verbose
 cargo test -- --nocapture
 ```
 
-## 📊 Struktur Proyek
+## 📚 Struktur Proyek
 
 ```
 mini_burn/
 ├── src/
 │   ├── lib.rs              # Entry point dan re-exports
-│   ├── backend/mod.rs      # Backend abstraction (CPU)
-│   ├── tensor/mod.rs       # Core tensor implementation
-│   ├── data/mod.rs         # Data types (Float, Int, Bool)
-│   ├── shape/mod.rs        # Shape dan dimension tracking
-│   └── ops/mod.rs          # Tensor operations
-├── examples/
-│   ├── basic_usage.rs      # Contoh penggunaan dasar
-│   ├── advanced_operations.rs
+│   ├── backend/            # Backend abstraction
+│   │   └── mod.rs         # CPU backend implementation
+│   ├── data/              # Data type system
+│   │   └── mod.rs         # Float, Int, Bool types
+│   ├── shape/             # Shape management
+│   │   └── mod.rs         # Multi-dimensional shapes
+│   ├── tensor/            # Core tensor implementation
+│   │   └── mod.rs         # Tensor struct dan factory methods
+│   └── ops/               # Tensor operations
+│       └── mod.rs         # Arithmetic, math, activations
+├── examples/              # Comprehensive examples
+│   ├── basic_usage.rs
+│   ├── activation_functions.rs
 │   ├── simple_neural_network.rs
+│   ├── mnist_demo.rs      # Computer vision demo
+│   ├── simple_mnist.rs    # Pattern recognition
+│   ├── advanced_operations.rs
 │   └── performance_test.rs
 ├── tests/
 │   └── integration_tests.rs
-└── README.md
+└── docs/
+    ├── ARCHITECTURE.md
+    └── CHANGELOG.md
 ```
 
-## 🎯 Contoh Neural Network
+## 🎯 Roadmap
+
+### Versi Selanjutnya
+- [ ] **Automatic Differentiation**: Backward pass untuk training
+- [ ] **Broadcasting**: Operasi tensor dengan shape yang berbeda
+- [ ] **GPU Backend**: Support CUDA/OpenCL
+- [ ] **SIMD Optimizations**: Vectorized operations
+- [ ] **More Data Types**: f64, i64, bfloat16
+- [ ] **Memory Pool**: Efficient memory management
+- [ ] **Model APIs**: Layers, optimizers, loss functions
+
+### Optimizations
+- [ ] **Blocked Matrix Multiplication**: Efficient GEMM
+- [ ] **Multi-threading**: Parallel operations dengan Rayon
+- [ ] **In-place Operations**: Reduce memory allocations
+- [ ] **JIT Compilation**: Runtime optimization
+
+## 🔬 Architecture Deep Dive
+
+### Type System
+
+Mini-Burn menggunakan sistem type yang kuat untuk memastikan safety:
 
 ```rust
-use mini_burn::{Tensor, CpuBackend, Shape};
+// B: Backend type (determines where computation happens)
+// D: Dimensions (compile-time constant)
+// K: Data type (Float, Int, Bool with default Float)
+pub struct Tensor<B: Backend, const D: usize, K: DataType = Float>
 
-// Implementasi layer linear sederhana
-struct LinearLayer {
-    weights: Tensor<CpuBackend, 2>,
-    bias: Tensor<CpuBackend, 1>,
+// Contoh spesifikasi eksplisit
+let tensor: Tensor<CpuBackend, 2, Float> = // 2D float tensor di CPU
+let int_tensor: Tensor<CpuBackend, 3, Int> = // 3D int tensor di CPU
+```
+
+### Backend Abstraction
+
+```rust
+pub trait Backend {
+    type Device: Device;
+    type Storage<T: DataType>: Storage<T>;
 }
 
-impl LinearLayer {
-    fn new(input_size: usize, output_size: usize) -> Self {
-        let weights = Tensor::zeros(Shape::new([input_size, output_size]));
-        let bias = Tensor::zeros(Shape::new([output_size]));
-        Self { weights, bias }
-    }
-    
-    fn forward(&self, input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
-        // Simplified forward pass
-        // input @ weights + bias
-        // ... implementasi detail
-    }
-}
-
-// Fungsi aktivasi
-fn relu(input: &Tensor<CpuBackend, 1>) -> Tensor<CpuBackend, 1> {
-    let data: Vec<f32> = input.to_data()
-        .iter()
-        .map(|&x| if x > 0.0 { x } else { 0.0 })
-        .collect();
-    
-    Tensor::from_data(data, input.shape().clone())
+// Implementasi CPU
+pub struct CpuBackend;
+pub struct CpuDevice;
+pub struct CpuStorage<T: DataType> {
+    data: Vec<T::Primitive>,
 }
 ```
 
-## 🔬 Pembelajaran
+### Shape System
 
-Framework ini dibuat untuk tujuan pembelajaran deep learning dan Rust. Beberapa konsep yang dipelajari:
+```rust
+pub struct Shape<const D: usize> {
+    dims: [usize; D],
+}
 
-1. **Type System**: Penggunaan generics dan trait bounds untuk type safety
-2. **Memory Management**: Rust ownership model untuk tensor data
-3. **Abstraction**: Backend abstraction untuk portability
-4. **Performance**: Zero-cost abstractions
-5. **Architecture Design**: Sistem modular dan extensible
+// Compile-time shape verification
+let shape_2d: Shape<2> = Shape::new([3, 4]); // ✅ OK
+let shape_3d: Shape<3> = Shape::new([2, 3, 4]); // ✅ OK
+// let invalid: Shape<2> = Shape::new([2, 3, 4]); // ❌ Compile error
+```
 
-## 🚧 Roadmap
+## 🤝 Contributing
 
-### Phase 1: Core Improvements
-- [ ] Broadcasting support
-- [ ] More tensor operations (sin, cos, exp, log, etc.) ✅
-- [ ] Better error handling dengan Result types
-- [ ] SIMD optimizations
+Kontribusi sangat diterima! Beberapa area yang bisa dikontribusikan:
 
-### Phase 2: Deep Learning Features
-- [ ] Automatic differentiation
-- [ ] Neural network layers
-- [ ] Optimizers (SGD, Adam)
-- [ ] Loss functions
+1. **Performance**: Optimasi operasi matematik
+2. **Features**: Implementasi operasi baru
+3. **Documentation**: Perbaikan dokumentasi dan contoh
+4. **Testing**: Menambah coverage test
+5. **Examples**: Contoh penggunaan yang lebih kompleks
 
-### Phase 3: Advanced Features
-- [ ] GPU backend
-- [ ] Model serialization
-- [ ] Graph optimization
-- [ ] JIT compilation
+### Development Setup
 
-### Phase 4: Production Features
-- [ ] Distributed training
-- [ ] Mixed precision
-- [ ] Dynamic shapes
-- [ ] Custom kernels
+```bash
+git clone https://github.com/yourusername/mini_burn.git
+cd mini_burn
+cargo build
+cargo test
+cargo run --example basic_usage
+```
 
-## 📈 Performance
+## 📄 License
 
-Current implementation:
-- **Element-wise operations**: O(n) linear dengan jumlah elemen
-- **Matrix multiplication**: O(n³) algoritma naive
-- **Memory allocation**: Tensor baru dibuat untuk setiap operasi
-- **SIMD**: Belum diimplementasikan
+Distributed under the MIT License. See `LICENSE` for more information.
 
-Optimization opportunities:
-- SIMD instructions untuk operasi vectorized
-- BLAS integration untuk linear algebra yang optimal
-- In-place operations untuk mengurangi alokasi memori
-- Parallel processing untuk tensor besar
-- GPU acceleration
+## 🎯 MNIST Computer Vision Examples
 
-## 🤝 Kontribusi
+Framework ini dilengkapi dengan dua contoh computer vision:
 
-Ini adalah proyek pembelajaran, silakan fork dan eksperimen sesuai kebutuhan Anda!
+### 1. Full MNIST Demo (`mnist_demo.rs`)
+```bash
+cargo run --example mnist_demo
+```
+- Simulasi MNIST 28x28 images dengan 10 classes (digits 0-9)
+- Multi-layer neural network (784 → 128 → 64 → 32 → 10)
+- Batch processing dan evaluation metrics
+- ASCII visualization dari synthetic images
+- Demonstrasi comprehensive untuk computer vision
 
-### Guidelines
-1. Fork repository
-2. Buat feature branch
-3. Commit changes dengan descriptive messages
-4. Tambahkan tests untuk fitur baru
-5. Buat pull request
+### 2. Simple MNIST (`simple_mnist.rs`)
+```bash
+cargo run --example simple_mnist
+```
+- Pattern recognition dengan 8x8 images
+- 3 classes sederhana: Circle, Cross, Square
+- Neural network yang lebih kecil (64 → 32 → 16 → 3)
+- Mudah dipahami untuk pembelajaran
+- Menunjukkan konsep dasar classification
 
-## 📝 Lisensi
+## 🧠 Computer Vision Capabilities
 
-Proyek ini dilisensikan under MIT License - lihat file [LICENSE](LICENSE) untuk detail.
+```rust
+// Contoh neural network untuk image classification
+let input: Tensor<CpuBackend, 2> = // Batch of images [batch_size, pixels]
+    Tensor::from_data(image_data, Shape::new([8, 784]));
+
+// Forward pass
+let hidden1 = input.matmul(&weights1).relu();
+let hidden2 = hidden1.matmul(&weights2).relu();
+let output = hidden2.matmul(&weights3).softmax(); // Probabilities per class
+
+// Classification
+let predicted_class = find_max_index(&output.to_data());
+```
+
+### Features Demonstrated:
+- ✅ Image preprocessing (flattening 2D images to 1D vectors)
+- ✅ Multi-layer dense networks
+- ✅ ReLU activations untuk hidden layers
+- ✅ Softmax untuk multi-class classification
+- ✅ Batch processing untuk efficiency
+- ✅ Synthetic data generation
+- ✅ Model evaluation dan accuracy metrics
+- ✅ ASCII art visualization
 
 ## 🙏 Acknowledgments
 
-- Inspired by [Burn Framework](https://burn.dev)
-- Rust community untuk dokumentasi dan resources yang excellent
-- Deep learning community untuk knowledge sharing
-
-## 📧 Kontak
-
-Jika ada pertanyaan atau saran, silakan buat issue di repository ini.
+- Terinspirasi oleh [Burn](https://burn.dev) - Modern deep learning framework
+- Rust community untuk ecosystem yang luar biasa
+- PyTorch dan TensorFlow untuk referensi API design
+- MNIST dataset concept untuk computer vision examples
 
 ---
 
-**Note**: Ini adalah implementasi minimal untuk tujuan pembelajaran. Untuk production workloads, gunakan framework yang sudah matang seperti Burn, Candle, atau tch.
+**Note**: Ini adalah framework untuk pembelajaran dan eksperimen. Untuk production, gunakan framework yang sudah mature seperti Burn, Candle, atau tch.

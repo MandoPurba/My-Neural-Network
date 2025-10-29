@@ -27,6 +27,26 @@ path = "examples/simple_neural_network.rs"
 name = "performance_test"
 path = "examples/performance_test.rs"
 
+[[example]]
+name = "activation_functions"
+path = "examples/activation_functions.rs"
+
+[[example]]
+name = "mnist_demo"
+path = "examples/mnist_demo.rs"
+
+[[example]]
+name = "simple_mnist"
+path = "examples/simple_mnist.rs"
+
+[[example]]
+name = "high_level_nn"
+path = "examples/high_level_nn.rs"
+
+[[example]]
+name = "mnist_with_nn_api"
+path = "examples/mnist_with_nn_api.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
